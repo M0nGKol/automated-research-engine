@@ -375,84 +375,174 @@ async def export_pdf(
     data: PDFExportRequest,
     user_id: Optional[str] = Depends(get_optional_user_id),
 ):
-    """Export research briefing as PDF."""
+    """Export research briefing as PDF using ReportLab."""
     try:
-        import markdown
-        from weasyprint import HTML
+        from reportlab.lib.pagesizes import letter
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.units import inch
+        from reportlab.lib.colors import HexColor
+        import html2text
     except ImportError:
         raise HTTPException(
             status_code=500,
-            detail="PDF export dependencies not installed. Run: pip install weasyprint markdown"
+            detail="PDF export dependencies not installed. Run: pip install reportlab markdown html2text"
         )
     
-    # Convert markdown to HTML
-    md = markdown.Markdown(extensions=['tables', 'fenced_code'])
-    briefing_html = md.convert(data.briefing)
-    
-    # Build sources list
-    sources_html = "<ul>"
-    for i, source in enumerate(data.sources, 1):
-        sources_html += f'<li><a href="{source.url}">[{i}] {source.title}</a> (Credibility: {source.credibility_score:.0%})</li>'
-    sources_html += "</ul>"
-    
-    # Build full HTML document
-    html_content = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="utf-8">
-        <style>
-            body {{
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                line-height: 1.6;
-                color: #333;
-                max-width: 800px;
-                margin: 0 auto;
-                padding: 40px;
-            }}
-            h1 {{ color: #1a1a1a; border-bottom: 2px solid #5865f2; padding-bottom: 10px; }}
-            h2 {{ color: #2d2d2d; margin-top: 30px; }}
-            h3 {{ color: #404040; }}
-            a {{ color: #5865f2; }}
-            code {{ background: #f4f4f4; padding: 2px 6px; border-radius: 4px; }}
-            pre {{ background: #f4f4f4; padding: 16px; border-radius: 8px; overflow-x: auto; }}
-            blockquote {{ border-left: 4px solid #5865f2; padding-left: 16px; color: #666; }}
-            ul, ol {{ padding-left: 24px; }}
-            .metadata {{ color: #666; font-size: 0.9em; margin-bottom: 30px; }}
-            .sources {{ margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; }}
-        </style>
-    </head>
-    <body>
-        <h1>Research Briefing: {data.topic}</h1>
-        <div class="metadata">
-            <p>Generated: {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}</p>
-            <p>Model: {data.model_used} | Time: {data.total_time_seconds:.1f}s | Sources: {len(data.sources)}</p>
-        </div>
+    try:
+        # Convert markdown to plain text
+        h = html2text.HTML2Text()
+        h.ignore_links = False
+        h.ignore_images = True
+        h.body_width = 0  # Don't wrap lines
         
-        {briefing_html}
+        # Convert markdown to HTML first, then to text
+        import markdown
+        md = markdown.Markdown(extensions=['tables', 'fenced_code'])
+        html_content = md.convert(data.briefing)
+        text_content = h.handle(html_content)
         
-        <div class="sources">
-            <h2>Sources</h2>
-            {sources_html}
-        </div>
-    </body>
-    </html>
-    """
-    
-    # Generate PDF
-    pdf_buffer = BytesIO()
-    HTML(string=html_content).write_pdf(pdf_buffer)
-    pdf_buffer.seek(0)
-    
-    # Generate filename
-    safe_topic = "".join(c if c.isalnum() else "_" for c in data.topic[:50])
-    filename = f"research_{safe_topic}_{datetime.utcnow().strftime('%Y%m%d')}.pdf"
-    
-    return StreamingResponse(
-        pdf_buffer,
-        media_type="application/pdf",
-        headers={"Content-Disposition": f"attachment; filename={filename}"},
-    )
+        # Create PDF buffer
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=letter,
+            rightMargin=72,
+            leftMargin=72,
+            topMargin=72,
+            bottomMargin=72
+        )
+        
+        # Get styles and create custom styles
+        styles = getSampleStyleSheet()
+        
+        # Custom styles
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=24,
+            textColor=HexColor('#1a1a1a'),
+            spaceAfter=12,
+            spaceBefore=0,
+        )
+        
+        heading_style = ParagraphStyle(
+            'CustomHeading',
+            parent=styles['Heading2'],
+            fontSize=16,
+            textColor=HexColor('#2d2d2d'),
+            spaceAfter=12,
+            spaceBefore=24,
+        )
+        
+        normal_style = ParagraphStyle(
+            'CustomNormal',
+            parent=styles['Normal'],
+            fontSize=11,
+            leading=14,
+            spaceAfter=6,
+        )
+        
+        metadata_style = ParagraphStyle(
+            'Metadata',
+            parent=styles['Normal'],
+            fontSize=9,
+            textColor=HexColor('#666666'),
+            spaceAfter=12,
+        )
+        
+        # Build story (content)
+        story = []
+        
+        # Title
+        story.append(Paragraph(f"<b>Research Briefing: {data.topic}</b>", title_style))
+        story.append(Spacer(1, 0.2 * inch))
+        
+        # Metadata
+        metadata_text = (
+            f"Generated: {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}<br/>"
+            f"Model: {data.model_used} | Time: {data.total_time_seconds:.1f}s | Sources: {len(data.sources)}"
+        )
+        story.append(Paragraph(metadata_text, metadata_style))
+        story.append(Spacer(1, 0.3 * inch))
+        
+        # Add briefing content
+        # Split by lines and process
+        lines = text_content.split('\n')
+        current_section = []
+        
+        for line in lines:
+            line = line.strip()
+            if not line:
+                if current_section:
+                    # Join current section and add as paragraph
+                    para_text = ' '.join(current_section)
+                    if para_text:
+                        # Escape HTML special characters for ReportLab
+                        para_text = para_text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                        story.append(Paragraph(para_text, normal_style))
+                    current_section = []
+                continue
+            
+            # Check if it's a heading
+            if line.startswith('#'):
+                # Add any pending content first
+                if current_section:
+                    para_text = ' '.join(current_section)
+                    if para_text:
+                        para_text = para_text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                        story.append(Paragraph(para_text, normal_style))
+                    current_section = []
+                
+                # Process heading
+                heading_text = line.lstrip('#').strip()
+                if heading_text:
+                    heading_text = heading_text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                    story.append(Paragraph(f"<b>{heading_text}</b>", heading_style))
+            else:
+                current_section.append(line)
+        
+        # Add any remaining content
+        if current_section:
+            para_text = ' '.join(current_section)
+            if para_text:
+                para_text = para_text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                story.append(Paragraph(para_text, normal_style))
+        
+        # Add sources section
+        story.append(PageBreak())
+        story.append(Paragraph("<b>Sources</b>", heading_style))
+        
+        for i, source in enumerate(data.sources, 1):
+            source_text = (
+                f"<b>[{i}] {source.title}</b><br/>"
+                f"URL: {source.url}<br/>"
+                f"Credibility Score: {source.credibility_score:.0%}"
+            )
+            story.append(Paragraph(source_text, normal_style))
+            story.append(Spacer(1, 0.1 * inch))
+        
+        # Build PDF
+        doc.build(story)
+        buffer.seek(0)
+        
+        # Generate filename
+        safe_topic = "".join(c if c.isalnum() else "_" for c in data.topic[:50])
+        filename = f"research_{safe_topic}_{datetime.utcnow().strftime('%Y%m%d')}.pdf"
+        
+        return StreamingResponse(
+            buffer,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename={filename}"},
+        )
+    except Exception as e:
+        import traceback
+        print(f"PDF export error: {e}")
+        print(traceback.format_exc())
+        raise HTTPException(
+            status_code=500,
+            detail=f"PDF export failed: {str(e)}"
+        )
 
 
 # ============================================================================

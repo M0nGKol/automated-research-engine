@@ -4,15 +4,14 @@ uvicorn[standard]==0.27.0
 python-multipart==0.0.6
 sse-starlette==2.0.0
 
-# LangChain - Compatible versions (all use langchain-core<0.2.0)
+# LangChain - Compatible versions
 langchain==0.1.20
 langchain-community==0.0.38
 langchain-core==0.1.52
 langchain-openai==0.0.5
 
 # Web Search & Scraping
-
-httpx==0.26.0  # Used for Google Custom Search API calls
+httpx==0.26.0
 beautifulsoup4==4.12.3
 html2text==2024.2.26
 
@@ -20,9 +19,11 @@ html2text==2024.2.26
 aiosqlite==0.19.0
 sqlalchemy[asyncio]==2.0.25
 
-# PDF Export
+# PDF Export - REMOVED (requires system dependencies)
+# weasyprint==60.2
 markdown==3.5.2
-weasyprint==60.2
+# Use reportlab as alternative (no system deps needed)
+reportlab==4.0.7
 
 # Academic Search
 arxiv==2.1.0
@@ -31,14 +32,16 @@ arxiv==2.1.0
 slowapi==0.1.9
 cachetools==5.3.2
 
-# Authentication (Clerk JWT verification)
+# Authentication
 PyJWT==2.8.0
 cryptography==42.0.2
 
 # Utilities
 python-dotenv==1.0.0
-pydantic==2.9.2  # Updated - better wheel support
-pydantic-settings==2.6.1  # Updated to match pydantic version
+pydantic==2.9.2
+pydantic-settings==2.6.1
+# tiktoken - let langchain handle it, but pin version
+tiktoken==0.8.0
 
 # Async support
 aiohttp==3.9.1
