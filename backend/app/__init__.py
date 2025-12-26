@@ -1,0 +1,2 @@
+"""Automated Research Agent Backend."""
+

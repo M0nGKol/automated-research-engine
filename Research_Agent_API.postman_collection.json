@@ -1,0 +1,352 @@
+{
+	"info": {
+		"name": "Research Agent API",
+		"description": "Complete API collection for Automated Research Agent",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "research-agent-api"
+	},
+	"item": [
+		{
+			"name": "Health & Config",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/health",
+							"host": ["{{base_url}}"],
+							"path": ["api", "health"]
+						}
+					}
+				},
+				{
+					"name": "LLM Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/health/llm",
+							"host": ["{{base_url}}"],
+							"path": ["api", "health", "llm"]
+						}
+					}
+				},
+				{
+					"name": "Get Config",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/config",
+							"host": ["{{base_url}}"],
+							"path": ["api", "config"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Research",
+			"item": [
+				{
+					"name": "Start Research (Quick)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"topic\": \"Latest developments in quantum computing\",\n  \"depth\": \"quick\",\n  \"include_academic\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/research",
+							"host": ["{{base_url}}"],
+							"path": ["api", "research"]
+						},
+						"description": "Start a quick research (3 sources). Returns SSE stream."
+					}
+				},
+				{
+					"name": "Start Research (Standard)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"topic\": \"AI developments in healthcare 2024\",\n  \"depth\": \"standard\",\n  \"include_academic\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/research",
+							"host": ["{{base_url}}"],
+							"path": ["api", "research"]
+						},
+						"description": "Start a standard research (5 sources). Returns SSE stream."
+					}
+				},
+				{
+					"name": "Start Research (Deep)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"topic\": \"Climate change mitigation strategies\",\n  \"depth\": \"deep\",\n  \"include_academic\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/research",
+							"host": ["{{base_url}}"],
+							"path": ["api", "research"]
+						},
+						"description": "Start a deep research (8 sources). Returns SSE stream."
+					}
+				},
+				{
+					"name": "Start Research (With Academic)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"topic\": \"Transformer architecture improvements\",\n  \"depth\": \"standard\",\n  \"include_academic\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/research",
+							"host": ["{{base_url}}"],
+							"path": ["api", "research"]
+						},
+						"description": "Start research with academic sources (arXiv + Semantic Scholar). Returns SSE stream."
+					}
+				}
+			]
+		},
+		{
+			"name": "Conversations",
+			"item": [
+				{
+					"name": "List Conversations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/conversations?limit=20&offset=0",
+							"host": ["{{base_url}}"],
+							"path": ["api", "conversations"],
+							"query": [
+								{
+									"key": "limit",
+									"value": "20"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Conversation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"topic\": \"Test research topic\",\n  \"depth\": \"standard\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"What are the latest AI developments?\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/conversations",
+							"host": ["{{base_url}}"],
+							"path": ["api", "conversations"]
+						}
+					}
+				},
+				{
+					"name": "Get Conversation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/conversations/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "conversations", "1"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Get a conversation by ID. Replace '1' with actual conversation ID."
+					}
+				},
+				{
+					"name": "Update Conversation",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"briefing\": \"This is a test briefing with research results.\",\n  \"sources_json\": \"[{\\\"url\\\": \\\"https://example.com\\\", \\\"title\\\": \\\"Example\\\"}]\",\n  \"total_time_seconds\": 45.5,\n  \"model_used\": \"llama3:8b\",\n  \"messages\": [\n    {\n      \"role\": \"assistant\",\n      \"content\": \"Here is the research briefing...\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/conversations/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "conversations", "1"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Update a conversation with research results. Replace '1' with actual conversation ID."
+					}
+				},
+				{
+					"name": "Delete Conversation",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/conversations/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "conversations", "1"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						},
+						"description": "Delete a conversation. Replace '1' with actual conversation ID."
+					}
+				}
+			]
+		},
+		{
+			"name": "PDF Export",
+			"item": [
+				{
+					"name": "Export PDF",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"topic\": \"Latest AI Developments\",\n  \"briefing\": \"## Executive Summary\\n\\nAI has advanced significantly in 2024.\\n\\n## Key Findings\\n\\n- [1] Breakthrough in transformer architectures\\n- [2] Improved efficiency in LLM training\\n\\n## References\\n\\n[1] [Example Paper](https://example.com/paper1)\\n[2] [Another Source](https://example.com/paper2)\",\n  \"sources\": [\n    {\n      \"url\": \"https://example.com/paper1\",\n      \"title\": \"Example Paper\",\n      \"snippet\": \"This is an example paper about AI.\",\n      \"credibility_score\": 0.85\n    },\n    {\n      \"url\": \"https://example.com/paper2\",\n      \"title\": \"Another Source\",\n      \"snippet\": \"Another example source.\",\n      \"credibility_score\": 0.8\n    }\n  ],\n  \"total_time_seconds\": 30.5,\n  \"model_used\": \"llama3:8b\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/export/pdf",
+							"host": ["{{base_url}}"],
+							"path": ["api", "export", "pdf"]
+						},
+						"description": "Export a research briefing as PDF. Note: In Postman, you'll need to 'Send and Download' to save the PDF file."
+					}
+				}
+			]
+		},
+		{
+			"name": "Cache Management",
+			"item": [
+				{
+					"name": "Get Cache Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/cache/stats",
+							"host": ["{{base_url}}"],
+							"path": ["api", "cache", "stats"]
+						},
+						"description": "Get cache statistics including hit rate, size, etc."
+					}
+				},
+				{
+					"name": "Clear Cache",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/cache/clear",
+							"host": ["{{base_url}}"],
+							"path": ["api", "cache", "clear"]
+						},
+						"description": "Clear all cached research results."
+					}
+				},
+				{
+					"name": "Invalidate Cache Entry",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/cache/{{topic}}?depth=standard&include_academic=false",
+							"host": ["{{base_url}}"],
+							"path": ["api", "cache", "{{topic}}"],
+							"query": [
+								{
+									"key": "depth",
+									"value": "standard"
+								},
+								{
+									"key": "include_academic",
+									"value": "false"
+								}
+							],
+							"variable": [
+								{
+									"key": "topic",
+									"value": "quantum computing"
+								}
+							]
+						},
+						"description": "Invalidate a specific cache entry by topic. Replace {{topic}} with actual topic."
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		}
+	]
+}
