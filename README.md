@@ -193,7 +193,7 @@ LLM_MODEL=meta-llama/Llama-3-8b-chat-hf
 | `LLM_MODEL`              | `llama3:8b`                | Model name/ID                   |
 | `LLM_TEMPERATURE`        | `0.1`                      | Sampling temperature            |
 | `LLM_MAX_TOKENS`         | `4096`                     | Max output tokens               |
-| `MAX_SEARCH_RESULTS`     | `10`                       | DuckDuckGo results to fetch     |
+| `MAX_SEARCH_RESULTS`     | `10`                       | CSE results to fetch            |
 | `MAX_SOURCES_TO_PROCESS` | `5`                        | Sources to summarize            |
 | `API_HOST`               | `0.0.0.0`                  | Backend bind address            |
 | `API_PORT`               | `8000`                     | Backend port                    |

@@ -40,7 +40,7 @@ class Settings(BaseSettings):
 
     # Server Configuration
     api_host: str = "0.0.0.0"
-    api_port: int = 8000
+    api_port: int = Field(default_factory=lambda: int(os.getenv("PORT", "8000")))
     cors_origins: str = "http://localhost:3000,http://localhost:3001"
 
     class Config:
