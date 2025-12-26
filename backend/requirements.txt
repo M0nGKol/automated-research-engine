@@ -19,10 +19,8 @@ html2text==2024.2.26
 aiosqlite==0.19.0
 sqlalchemy[asyncio]==2.0.25
 
-# PDF Export - REMOVED (requires system dependencies)
-# weasyprint==60.2
+# PDF Export
 markdown==3.5.2
-# Use reportlab as alternative (no system deps needed)
 reportlab==4.0.7
 
 # Academic Search
@@ -40,8 +38,7 @@ cryptography==42.0.2
 python-dotenv==1.0.0
 pydantic==2.9.2
 pydantic-settings==2.6.1
-# tiktoken - let langchain handle it, but pin version
-tiktoken==0.8.0
+# tiktoken will be installed by langchain-openai with compatible version (0.5.2 to <0.6.0)
 
 # Async support
 aiohttp==3.9.1
